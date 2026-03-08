@@ -316,16 +316,30 @@ def fmt_large(val):
 def fmt_fin_df(df):
     """
     Format financial statement:
-    - Columns show year only
-    - Values in USD Millions
-    - Key rows ordered first (Total Revenue, Gross Profit, Operating Income, Net Income...)
+    - Columns show year only (handles Timestamp and string)
+    - Values in USD Millions, rounded to 2 dp
+    - Key rows ordered first
     - Index named 'Particulars (USD Millions)'
     """
     if df is None or df.empty:
         return df
     df = df.copy()
-    df.columns = [str(c)[:4] for c in df.columns]
-    df = df[sorted(df.columns, reverse=True)]
+
+    def extract_year(c):
+        try:
+            if hasattr(c, "year"):
+                return str(c.year)
+            return str(c)[:4]
+        except Exception:
+            return str(c)
+
+    df.columns = [extract_year(c) for c in df.columns]
+
+    try:
+        df = df[sorted(df.columns, key=lambda x: int(x), reverse=True)]
+    except Exception:
+        pass
+
     df = df.apply(pd.to_numeric, errors="coerce") / 1_000_000
     df = df.round(2)
 
