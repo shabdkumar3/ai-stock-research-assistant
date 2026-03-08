@@ -2,11 +2,6 @@
 
 > An AI-powered stock research dashboard that gives you deep fundamental, technical, and sentiment analysis — all in one place.
 
-[![Live App](https://img.shields.io/badge/🚀%20Live%20App-Streamlit-FF4B4B?style=for-the-badge)](https://ai-stock-research-assistant.streamlit.app/)
-[![Made with Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![Powered by LLaMA](https://img.shields.io/badge/LLM-LLaMA%203.1-blueviolet?style=for-the-badge)](https://groq.com)
-[![FinBERT](https://img.shields.io/badge/NLP-FinBERT-orange?style=for-the-badge)](https://huggingface.co/ProsusAI/finbert)
-
 ---
 
 ## 🌐 Live Demo
