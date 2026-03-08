@@ -12,7 +12,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-API_KEY = os.environ.get("GROQ_API_KEY")
+API_KEY = os.environ.get(GROQ_API_KEY)
 model = ChatGroq(api_key=API_KEY, model_name="llama-3.1-8b-instant")
 
 @st.cache_resource(show_spinner=False)
