@@ -1,0 +1,11 @@
+yfinance
+streamlit
+langchain-groq
+langchain-core
+transformers
+torch
+requests
+ta
+pandas
+plotly
+python-dotenv
