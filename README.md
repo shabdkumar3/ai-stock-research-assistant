@@ -1,60 +1,54 @@
 # 📈 Stockwise AI — Equity Research Assistant
 
-> An AI-powered stock research dashboard that gives you deep fundamental, technical, and sentiment analysis — all in one place.
+> An AI-powered stock research dashboard delivering deep fundamental, technical, and sentiment analysis — all in one place.
 
----
-
-## 🌐 Live Demo
-
-**👉 [https://ai-stock-research-assistant.streamlit.app/](https://ai-stock-research-assistant.streamlit.app/)**
-
-Type any company name (e.g. Apple, Tesla, Reliance) and get a full AI-driven research report instantly.
+**🌐 Live Demo → [ai-stock-research-assistant.streamlit.app](https://ai-stock-research-assistant.streamlit.app/)**
 
 ---
 
 ## ✨ Features
 
-### Single Stock Analysis
-- **Live price data** with day change, market cap, beta, dividend yield and short float
-- **Candlestick chart** with Bollinger Bands overlay
-- **Moving averages** (MA50 / MA200) and trend detection
-- **MACD histogram** and **RSI** charts with overbought/oversold zones
-- **Volume analysis** with 20-day average overlay
-- **Trading signals** — MACD, Bollinger, ADX trend strength
+### 🔍 Single Stock Analysis
+- Live price, market cap, beta, dividend yield, short float
+- Candlestick chart with Bollinger Bands overlay
+- Moving averages (MA50 / MA200) with trend detection
+- MACD histogram + RSI with overbought/oversold zones
+- Volume analysis with 20-day average overlay
+- Trading signals — MACD, Bollinger, ADX trend strength
 
-### Fundamental Intelligence
-- Income Statement, Balance Sheet and Cash Flow (yearly, formatted cleanly)
-- Revenue and net income growth YoY
+### 📊 Fundamental Intelligence
+- Income Statement, Balance Sheet, Cash Flow (annual, USD Millions)
+- Revenue & net income growth YoY
 - Net profit margin trend chart
 - Earnings stability score
 - Valuation multiples — P/E vs industry, PEG, P/B, P/S, EV/EBITDA
 
-### Sentiment & News
+### 🗞️ Sentiment & News
 - Latest news articles with per-article FinBERT sentiment scoring
 - Reddit buzz tracking for social sentiment
 - AI-generated 2-sentence sentiment verdict (LLaMA 3.1)
 - Combined news + Reddit sentiment score
 
-### Market Context
+### 🌍 Market Context
 - Stock vs S&P 500 normalised performance chart
 - VIX fear index reading
 - 10-Year Treasury yield with equity impact assessment
 
-### Competitive Intelligence
+### ⚔️ Competitive Intelligence
 - Auto-fetched competitor tickers via AI
 - Side-by-side comparison table (market cap, P/E, revenue, beta)
 - Market cap bar chart vs peers
 
-### Risk & Institutions
-- Risk score out of 100 (volatility + RSI + sentiment components) with visual gauge
-- Analyst ratings breakdown (Strong Buy → Strong Sell bar chart)
+### ⚠️ Risk & Institutions
+- Risk score out of 100 (volatility + RSI + sentiment) with visual gauge
+- Analyst ratings breakdown (Strong Buy → Strong Sell)
 - Analyst price targets (mean, median, low, high)
 - Insider buying vs selling activity
 - Top 5 institutional holders with ownership chart
 - Options Put/Call ratio (volume + open interest)
 
-### Stock Comparison Mode
-- Enter multiple companies to compare them side by side
+### ⚖️ Stock Comparison Mode
+- Compare multiple companies side by side
 - Normalised price performance chart (base = 100)
 - AI verdict ranking best to worst with buy recommendation
 
@@ -67,27 +61,48 @@ Type any company name (e.g. Apple, Tesla, Reliance) and get a full AI-driven res
 | UI | Streamlit |
 | LLM | LLaMA 3.1 8B via Groq API |
 | Sentiment NLP | FinBERT (ProsusAI) via HuggingFace |
-| Market Data | yFinance |
+| Market Data | yahooquery |
 | Technical Analysis | `ta` library |
 | Charts | Plotly |
 | Data | Pandas, NumPy |
 
 ---
+
+## 🚀 Run Locally
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/your-username/ai-stock-research-assistant.git
+cd ai-stock-research-assistant
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Add your API key
+echo "GROQ_API_KEY=your_key_here" > .env
+
+# 4. Run
+streamlit run app.py
+```
+
+Get a free Groq API key at [console.groq.com](https://console.groq.com)
+
+---
+
 ## 📦 Requirements
 
 ```
 streamlit
-yfinance
 langchain-groq
 langchain-core
 transformers
 torch
+requests
 ta
 pandas
-numpy
 plotly
-requests
 python-dotenv
+yahooquery
 ```
 
 ---
@@ -105,13 +120,12 @@ python-dotenv
 
 ## ⚠️ Disclaimer
 
-This tool is for **informational and educational purposes only**. Nothing on this platform constitutes financial advice. Always do your own research before making any investment decisions.
+This tool is for **informational and educational purposes only**. Nothing on this platform constitutes financial advice. Always do your own research before making investment decisions.
 
 ---
 
-## 🙌 Acknowledgements
+## 🙌 Built By
 
-- [Groq](https://groq.com) for blazing fast LLaMA inference
-- [yFinance](https://github.com/ranaroussi/yfinance) for market data
-- [ProsusAI/FinBERT](https://huggingface.co/ProsusAI/finbert) for financial sentiment analysis
-- [Streamlit](https://streamlit.io) for the UI framework
+**Shabd Kumar** · B.Tech Energy Engineering · IIT Delhi
+
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ai-stock-research-assistant.streamlit.app/)
