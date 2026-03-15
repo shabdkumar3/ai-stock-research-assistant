@@ -9,5 +9,4 @@ ta
 pandas
 plotly
 python-dotenv
-requests
-
+curl_cffi
