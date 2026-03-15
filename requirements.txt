@@ -9,3 +9,5 @@ ta
 pandas
 plotly
 python-dotenv
+requests
+

@@ -1,9 +1,12 @@
+import time
 import yfinance as yf
 import streamlit as st
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 from transformers import pipeline
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import ast
 import ta
 import pandas as pd
@@ -290,52 +293,110 @@ def load_sentiment_model():
 sentiment_model = load_sentiment_model()
 
 
-# Cached fetchers
+# ── Rate-limit-proof yfinance session ────────────────────────────────────────
+
+def _yf_session() -> requests.Session:
+    """Return a requests Session that mimics a browser to avoid Yahoo rate limits."""
+    session = requests.Session()
+    retry = Retry(
+        total=3,
+        backoff_factor=1.5,
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods=["GET", "POST"],
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("https://", adapter)
+    session.mount("http://",  adapter)
+    session.headers.update({
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/120.0.0.0 Safari/537.36"
+        )
+    })
+    return session
+
+
+def _yf_ticker(symbol: str) -> yf.Ticker:
+    return yf.Ticker(symbol, session=_yf_session())
+
+
+def _with_backoff(fn, retries: int = 3, base_wait: float = 3.0):
+    """Call fn(); on YFRateLimitError retry with exponential back-off."""
+    for attempt in range(retries):
+        try:
+            return fn()
+        except Exception as exc:
+            is_rate_limit = "RateLimit" in type(exc).__name__
+            if is_rate_limit and attempt < retries - 1:
+                wait = base_wait * (attempt + 1)
+                time.sleep(wait)
+            else:
+                raise
+
+
+# ── Cached fetchers ───────────────────────────────────────────────────────────
 
 @st.cache_data(show_spinner=False, ttl=300)
 def fetch_stock_data(ticker: str):
-    stock = yf.Ticker(ticker)
-    return stock.info, stock.history(period="1y")
+    def _fetch():
+        stock = _yf_ticker(ticker)
+        return stock.info, stock.history(period="1y")
+    return _with_backoff(_fetch)
 
 @st.cache_data(show_spinner=False, ttl=300)
 def fetch_financials(ticker: str):
-    s = yf.Ticker(ticker)
-    return s.financials, s.balance_sheet, s.cash_flow
+    def _fetch():
+        s = _yf_ticker(ticker)
+        return s.financials, s.balance_sheet, s.cash_flow
+    return _with_backoff(_fetch)
 
 @st.cache_data(show_spinner=False, ttl=300)
 def fetch_news(ticker: str):
-    return yf.Ticker(ticker).news[:6]
+    def _fetch():
+        return _yf_ticker(ticker).news[:6]
+    return _with_backoff(_fetch)
 
 @st.cache_data(show_spinner=False, ttl=300)
 def fetch_insider_inst(ticker: str):
-    s = yf.Ticker(ticker)
-    return s.insider_transactions, s.institutional_holders
+    def _fetch():
+        s = _yf_ticker(ticker)
+        return s.insider_transactions, s.institutional_holders
+    return _with_backoff(_fetch)
 
 @st.cache_data(show_spinner=False, ttl=300)
 def fetch_options(ticker: str):
-    s = yf.Ticker(ticker)
-    if s.options:
-        opt = s.option_chain(s.options[0])
-        return opt.calls, opt.puts
-    return None, None
+    def _fetch():
+        s = _yf_ticker(ticker)
+        if s.options:
+            opt = s.option_chain(s.options[0])
+            return opt.calls, opt.puts
+        return None, None
+    return _with_backoff(_fetch)
 
 @st.cache_data(show_spinner=False, ttl=300)
 def fetch_recommendations(ticker: str):
-    return yf.Ticker(ticker).recommendations_summary
+    def _fetch():
+        return _yf_ticker(ticker).recommendations_summary
+    return _with_backoff(_fetch)
 
 @st.cache_data(show_spinner=False, ttl=300)
 def fetch_competitor_info(comp: str):
-    return yf.Ticker(comp).info
+    def _fetch():
+        return _yf_ticker(comp).info
+    return _with_backoff(_fetch)
 
 @st.cache_data(show_spinner=False, ttl=600)
 def fetch_macro():
-    vix = yf.Ticker("^VIX").history(period="5d")["Close"].iloc[-1]
-    tnx = yf.Ticker("^TNX").history(period="5d")["Close"].iloc[-1]
-    sp  = yf.Ticker("^GSPC").history(period="1y")["Close"]
-    return vix, tnx, sp
+    def _fetch():
+        vix = _yf_ticker("^VIX").history(period="5d")["Close"].iloc[-1]
+        tnx = _yf_ticker("^TNX").history(period="5d")["Close"].iloc[-1]
+        sp  = _yf_ticker("^GSPC").history(period="1y")["Close"]
+        return vix, tnx, sp
+    return _with_backoff(_fetch)
 
 
-# Helpers
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
 @st.cache_data(show_spinner=False)
 def get_ticker(company: str) -> str:
@@ -455,7 +516,8 @@ def fmt_fin_df(df):
     return df
 
 
-# Masthead
+# ── Masthead ──────────────────────────────────────────────────────────────────
+
 st.markdown("""
 <div class="masthead">
   <h1>Stockwise AI</h1>
@@ -477,7 +539,8 @@ with col_b:
     compare_input = st.text_input("compare", placeholder="e.g. Apple, Tesla, Google, Microsoft", label_visibility="collapsed")
 
 
-# COMPARISON MODE
+# ── COMPARISON MODE ───────────────────────────────────────────────────────────
+
 if compare_input:
     st.markdown("<p class='section-label'>Comparison Dashboard</p>", unsafe_allow_html=True)
 
@@ -560,7 +623,8 @@ End with: ⚠️ Not financial advice.
     st.divider()
 
 
-# SINGLE STOCK MODE
+# ── SINGLE STOCK MODE ─────────────────────────────────────────────────────────
+
 if company:
 
     with st.spinner("Looking up ticker…"):
