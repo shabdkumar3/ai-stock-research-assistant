@@ -1,5 +1,5 @@
-yfinance
 streamlit
+yfinance
 langchain-groq
 langchain-core
 transformers
@@ -10,3 +10,4 @@ pandas
 plotly
 python-dotenv
 curl_cffi
+certifi
