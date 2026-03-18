@@ -524,9 +524,9 @@ if compare_input:
             def color_ytd(val):
                 try: return "color:#34d399" if float(val)>0 else "color:#f87171"
                 except: return ""
-            st.dataframe(df_cmp.style.applymap(color_ytd,subset=["YTD (%)"]),use_container_width=True,hide_index=True)
+            st.dataframe(df_cmp.style.map(color_ytd,subset=["YTD (%)"]),width='stretch',hide_index=True)
             fig.update_layout(title="Normalised Price Performance (Base = 100)",**PLOTLY_LAYOUT)
-            st.plotly_chart(fig,use_container_width=True)
+            st.plotly_chart(fig,width='stretch')
             st.markdown("<p class='section-label'>AI Verdict</p>",unsafe_allow_html=True)
             with st.spinner("Analysing…"):
                 r=model.invoke([SystemMessage(content="You are a concise financial analyst. Be direct, avoid fluff."),
@@ -618,7 +618,7 @@ if company:
         fc.add_trace(go.Scatter(x=hist.index,y=hist["lband"],name="Lower BB",line=dict(color=AMBER,width=1,dash="dot"),
                                  fill="tonexty",fillcolor="rgba(251,191,36,0.04)"))
         fc.update_layout(xaxis_rangeslider_visible=False,title="Candlestick + Bollinger Bands",**PLOTLY_LAYOUT)
-        st.plotly_chart(fc,use_container_width=True)
+        st.plotly_chart(fc,width='stretch')
 
     with ct2:
         fm=go.Figure()
@@ -626,7 +626,7 @@ if company:
         fm.add_trace(go.Scatter(x=hist.index,y=hist["MA50"],name="MA50",line=dict(color=BLUE,width=1.5,dash="dash")))
         fm.add_trace(go.Scatter(x=hist.index,y=hist["MA200"],name="MA200",line=dict(color=AMBER,width=1.5,dash="dash")))
         fm.update_layout(title="Close Price with Moving Averages",**PLOTLY_LAYOUT)
-        st.plotly_chart(fm,use_container_width=True)
+        st.plotly_chart(fm,width='stretch')
 
     with ct3:
         mhv=hist["MACD"]-hist["MACD_Signal"]
@@ -635,13 +635,13 @@ if company:
         fmacd.add_trace(go.Scatter(x=hist.index,y=hist["MACD_Signal"],name="Signal",line=dict(color=AMBER,width=1.5,dash="dash")))
         fmacd.add_trace(go.Bar(x=hist.index,y=mhv,name="Histogram",marker_color=[ACCENT if v>=0 else RED for v in mhv],opacity=0.6))
         fmacd.update_layout(title="MACD",**PLOTLY_LAYOUT)
-        st.plotly_chart(fmacd,use_container_width=True)
+        st.plotly_chart(fmacd,width='stretch')
         frsi=go.Figure()
         frsi.add_trace(go.Scatter(x=hist.index,y=hist["RSI"],name="RSI",line=dict(color=BLUE,width=2)))
         frsi.add_hline(y=70,line_dash="dot",line_color=RED,annotation_text="Overbought 70")
         frsi.add_hline(y=30,line_dash="dot",line_color=ACCENT,annotation_text="Oversold 30")
         frsi.update_layout(title="RSI",yaxis_range=[0,100],**PLOTLY_LAYOUT)
-        st.plotly_chart(frsi,use_container_width=True)
+        st.plotly_chart(frsi,width='stretch')
 
     st.markdown("<p class='section-label'>Trading Signals</p>",unsafe_allow_html=True)
     s1,s2,s3,s4,s5=st.columns(5)
@@ -657,7 +657,7 @@ if company:
                          marker_color=[ACCENT if c>=o else RED for c,o in zip(hist["Close"],hist["Open"])],opacity=0.7))
     fv.add_trace(go.Scatter(x=hist.index,y=hist["Vol_MA20"],name="20-day Avg",line=dict(color=AMBER,width=2)))
     fv.update_layout(title="Daily Volume with 20-Day Average",**PLOTLY_LAYOUT)
-    st.plotly_chart(fv,use_container_width=True)
+    st.plotly_chart(fv,width='stretch')
     lv=hist["Volume"].iloc[-1]; av=hist["Vol_MA20"].iloc[-1]
     vp=round((lv-av)/av*100,1) if av else 0
     v1,v2,v3=st.columns(3)
@@ -721,9 +721,9 @@ if company:
     with st.spinner("Loading financials…"):
         fin,bal,cf=fetch_financials(ticker)
     ft1,ft2,ft3=st.tabs(["Income Statement","Balance Sheet","Cash Flow"])
-    with ft1: st.dataframe(fmt_fin_df(fin),use_container_width=True)
-    with ft2: st.dataframe(fmt_fin_df(bal),use_container_width=True)
-    with ft3: st.dataframe(fmt_fin_df(cf), use_container_width=True)
+    with ft1: st.dataframe(fmt_fin_df(fin),width='stretch')
+    with ft2: st.dataframe(fmt_fin_df(bal),width='stretch')
+    with ft3: st.dataframe(fmt_fin_df(cf), width='stretch')
 
     st.markdown("<p class='section-label'>Growth & Margins</p>",unsafe_allow_html=True)
     ana_str=""
@@ -740,7 +740,7 @@ if company:
         fig_m.add_trace(go.Scatter(x=margin_ser.index,y=margin_ser.values,fill="tozeroy",name="Net Margin %",
                                     line=dict(color=ACCENT,width=2),fillcolor="rgba(52,211,153,0.1)"))
         fig_m.update_layout(title="Net Profit Margin Trend",yaxis_ticksuffix="%",**PLOTLY_LAYOUT)
-        st.plotly_chart(fig_m,use_container_width=True)
+        st.plotly_chart(fig_m,width='stretch')
         ana_str=fin.loc[[r for r in ["Total Revenue","Net Income","Operating Income","Gross Profit"] if r in fin.index]].to_string()
         with st.spinner("Analysing financials…"):
             fr=model.invoke([SystemMessage(content="You are a financial analyst. Be concise — 3 bullet points max."),
@@ -771,10 +771,10 @@ if company:
                                    "52W High":ci.get("fiftyTwoWeekHigh","N/A"),"Beta":round(ci.get("beta") or 0,2)})
             except: pass
         comp_df=pd.DataFrame(comp_rows)
-        st.dataframe(comp_df,use_container_width=True,hide_index=True)
+        st.dataframe(comp_df,width='stretch',hide_index=True)
         fcomp=go.Figure(go.Bar(x=comp_df["Company"],y=comp_df["Mkt Cap ($B)"],marker_color=ACCENT,opacity=0.8))
         fcomp.update_layout(title="Market Cap Comparison ($B)",yaxis_title="$B",**PLOTLY_LAYOUT)
-        st.plotly_chart(fcomp,use_container_width=True)
+        st.plotly_chart(fcomp,width='stretch')
         stock_pe=info.get("trailingPE")
         if stock_pe and stock_pe>0 and pe_list:
             ip=sum(pe_list)/len(pe_list)
@@ -791,7 +791,7 @@ if company:
         fvs.add_trace(go.Scatter(x=ns.index,y=ns.values,name=ticker,line=dict(color=ACCENT,width=2)))
         fvs.add_trace(go.Scatter(x=nsp.index,y=nsp.values,name="S&P 500",line=dict(color="#9ca3af",width=1.5,dash="dash")))
         fvs.update_layout(title=f"{ticker} vs S&P 500 (Normalised, Base = 100)",**PLOTLY_LAYOUT)
-        st.plotly_chart(fvs,use_container_width=True)
+        st.plotly_chart(fvs,width='stretch')
         mac1,mac2=st.columns(2)
         with mac1:
             if vix_val<20:   st.success(f"VIX {vix_val:.1f} — Market Calm")
@@ -823,7 +823,7 @@ if company:
                "bgcolor":"rgba(0,0,0,0)"},
         title={"text":"Risk Score","font":{"color":"#9ca3af"}},domain={"x":[0,1],"y":[0,1]}))
     fg.update_layout(paper_bgcolor="rgba(0,0,0,0)",font=dict(family="DM Sans"),height=260,margin=dict(t=40,b=10))
-    st.plotly_chart(fg,use_container_width=True)
+    st.plotly_chart(fg,width='stretch')
     if risk_score>70:   st.error("High Risk — Proceed with significant caution.")
     elif risk_score>40: st.warning("Medium Risk — Monitor positions closely.")
     else:               st.success("Low Risk — Relatively stable profile.")
@@ -847,7 +847,7 @@ if company:
                                     y=[w.get("strongBuy",0),w.get("buy",0),w.get("hold",0),w.get("sell",0),w.get("strongSell",0)],
                                     marker_color=["#14532d",ACCENT,AMBER,RED,"#7f1d1d"]))
                 fb.update_layout(showlegend=False,height=220,**PLOTLY_LAYOUT)
-                st.plotly_chart(fb,use_container_width=True)
+                st.plotly_chart(fb,width='stretch')
         else:
             st.warning("No analyst rating data available.")
     except Exception as e:
@@ -899,7 +899,7 @@ if company:
                 top5=inst_df.head(5)
                 fi=go.Figure(go.Bar(x=top5[holder_col],y=(top5[pct_col]*100).round(2),marker_color=BLUE,opacity=0.85))
                 fi.update_layout(title="Top 5 Institutional Holders",yaxis_ticksuffix="%",height=240,**PLOTLY_LAYOUT)
-                st.plotly_chart(fi,use_container_width=True)
+                st.plotly_chart(fi,width='stretch')
         else:
             st.warning("No institutional holder data available.")
 
