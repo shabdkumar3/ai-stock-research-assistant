@@ -122,11 +122,19 @@ def _safe(val, fallback=None):
 @st.cache_data(show_spinner=False, ttl=300)
 def fetch_stock_data(symbol: str):
     t    = Ticker(symbol)
-    prof = t.asset_profile.get(symbol, {}) or {}
-    fin  = t.financial_data.get(symbol, {}) or {}
-    ks   = t.key_stats.get(symbol, {}) or {}
-    sq   = t.summary_detail.get(symbol, {}) or {}
-    qp   = t.price.get(symbol, {}) or {}
+
+    def _dict(val):
+        """Return val only if it's a dict — yahooquery sometimes returns error strings."""
+        return val if isinstance(val, dict) else {}
+
+    prof = _dict(t.asset_profile.get(symbol, {}))
+    fin  = _dict(t.financial_data.get(symbol, {}))
+    ks   = _dict(t.key_stats.get(symbol, {}))
+    sq   = _dict(t.summary_detail.get(symbol, {}))
+    qp   = _dict(t.price.get(symbol, {}))
+
+    if not qp and not fin:
+        raise ValueError(f"No data found for ticker '{symbol}'. Please check the symbol and try again.")
 
     info = {
         "longName":                     qp.get("longName") or prof.get("longName"),
